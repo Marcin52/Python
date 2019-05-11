@@ -61,6 +61,6 @@ while True:
     accy = acc_yout / 16384.0
     accz = acc_zout / 16384.0
 
-    print(f"gx {gyro_xout}  acx {accx} acy {accy} acz {accz} ang {angle}")
+    print("gx " + str(gyro_xout) + "acx " + str(accx) + "acy " + str(accy) + "acz " + str(accz) + "ang " str(angle))
 
     sleep(0.1)
