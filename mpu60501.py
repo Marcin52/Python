@@ -49,6 +49,11 @@ Echo2 = 25
 Trig3 = 8
 Echo3 =7
 
+west = 0
+east = 0
+north = 0
+control = 16
+
 def close(signal, frame):
 	print("\nTurning off ultrasonic distance detection...\n")
 	GPIO.cleanup() 
@@ -77,7 +82,10 @@ bus.write_byte_data(address, power_mgmt_1, 0)
 i=0
 v=0
 s=0
+index = 80201
+position = 0
 map = []
+walkTime = 0
 
 while True: 
 	# set Trigger to HIGH
@@ -94,6 +102,10 @@ while True:
 		TimeElapsed = stopTime - startTime
 		distance = (TimeElapsed * 34300) / 2
 		print ("Distance: %.1f cm" % distance)
+		if distance <50:
+			west = 1
+		else:
+			west = 0
 	if i ==1:
 		GPIO.output(Trig2, True)
 		time.sleep(0.00001)
@@ -107,6 +119,10 @@ while True:
 		TimeElapsed2 = stopTime2 - startTime2
 		distance2 = (TimeElapsed2 * 34300) / 2
 		print ("Distance2: %.1f cm" % distance2)
+		if distance2 <50:
+			north = 8
+		else:
+			north = 0
 	if i ==2:
 		GPIO.output(Trig3, True)
 		time.sleep(0.00001)
@@ -120,6 +136,13 @@ while True:
 		TimeElapsed3 = stopTime3 - startTime3
 		distance3 = (TimeElapsed3 * 34300) / 2
 		print ("Distance3: %.1f cm" % distance3)
+		if distance 3<50:
+			east = 4
+		else:
+			east  = 0
+		position = west + north + east + control
+		if map[index] == 0:
+			map[index] = position
 		i= -1
 	
 	gyro_xout = read_word_2c(0x43)/131
@@ -158,4 +181,6 @@ while True:
 	'''
 	i=i+1
 	time.sleep(0.1)
-	
+	walkTime = walkTime + 0.1
+	if walkTime % 1 ==0:
+		position = position + 400
