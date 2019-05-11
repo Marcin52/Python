@@ -74,59 +74,53 @@ address = 0x68       # via i2cdetect
 # Aktivieren, um das Modul ansprechen zu koennen
 bus.write_byte_data(address, power_mgmt_1, 0)
 
+i=0
 v=0
 s=0
 map = []
 
 while True: 
 	# set Trigger to HIGH
-	GPIO.output(pinTrigger, True)
-	GPIO.output(Trig2, True)
-	GPIO.output(Trig3, True)
-	# set Trigger after 0.01ms to LOW
-	time.sleep(0.00001)
-	GPIO.output(pinTrigger, False)
-	GPIO.output(Trig2, False)
-	GPIO.output(Trig3, False)
-	
-	startTime = time.time()
-	stopTime = time.time()
-	startTime2 = time.time()
-	stopTime2 = time.time()
-	startTime3 = time.time()
-	stopTime3 = time.time()
-	
-	# save start time
-	while 0 == GPIO.input(pinEcho):
+	if i == 0:
+		GPIO.output(pinTrigger, True)
+		time.sleep(0.00001)
+		GPIO.output(pinTrigger, False)
 		startTime = time.time()
-	while 0 == GPIO.input(Echo2):
-		startTime2 = time.time()
-	#	print("yes")
-	while 0 == GPIO.input(Echo3):
-		startTime3 = time.time()
-	
-	# save time of arrival
-	while 1 == GPIO.input(pinEcho):
 		stopTime = time.time()
-	while 1 == GPIO.input(Echo2):
+		while 0 == GPIO.input(pinEcho):
+			startTime = time.time()
+		while 1 == GPIO.input(pinEcho):
+			stopTime = time.time()
+		TimeElapsed = stopTime - startTime
+		distance = (TimeElapsed * 34300) / 2
+		print ("Distance: %.1f cm" % distance)
+	if i ==1:
+		GPIO.output(Trig2, True)
+		time.sleep(0.00001)
+		GPIO.output(Trig2, False)
+		startTime2 = time.time()
 		stopTime2 = time.time()
-	#	print("no")
-	while 1 == GPIO.input(Echo3):
+		while 0 == GPIO.input(Echo2):
+			startTime2 = time.time()
+		while 1 == GPIO.input(Echo2):
+			stopTime2 = time.time()
+		TimeElapsed2 = stopTime2 - startTime2
+		distance2 = (TimeElapsed2 * 34300) / 2
+		print ("Distance2: %.1f cm" % distance2)
+	if i ==2:
+		GPIO.output(Trig3, True)
+		time.sleep(0.00001)
+		GPIO.output(Trig3, False)
+		startTime3 = time.time()
 		stopTime3 = time.time()
-	
-	# time difference between start and arrival
-	TimeElapsed = stopTime - startTime
-	TimeElapsed2 = stopTime2 - startTime2
-	TimeElapsed3 = stopTime3 - startTime3
-	# multiply with the sonic speed (34300 cm/s)
-	# and divide by 2, because there and back
-	distance = (TimeElapsed * 34300) / 2
-	distance2 = (TimeElapsed2 * 34300) / 2
-	distance3 = (TimeElapsed3 * 34300) / 2
-	
-	print ("Distance: %.1f cm" % distance)
-	print ("Distance2: %.1f cm" % distance2)
-	print ("Distance3: %.1f cm" % distance3)
+		while 0 == GPIO.input(Echo3):
+			startTime3 = time.time()
+		while 1 == GPIO.input(Echo3):
+			stopTime3 = time.time()
+		TimeElapsed3 = stopTime3 - startTime3
+		distance3 = (TimeElapsed3 * 34300) / 2
+		print ("Distance3: %.1f cm" % distance3)
+		i= -1
 	
 	gyro_xout = read_word_2c(0x43)/131
 	gyro_yout = read_word_2c(0x45)/131
@@ -162,5 +156,6 @@ while True:
 	print("v: %.3f" % v)
 	print("s: %.3f" %s)
 	'''
-	
+	i=i+1
 	time.sleep(0.1)
+	
