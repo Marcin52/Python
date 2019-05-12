@@ -146,22 +146,30 @@ while True:
 			east = 4 # binary 0000 0010
 		else:
 			east  = 0
-		# 
+		# variable walls is a sum of checks on three directions
 		walls = west + north + east + control
+		#assign walls to actual position index
 		if map[index] == 0:
 			map[index] = walls
 		i= -1
-	
+	#angular speed measurment
 	gyro_zout = read_word_2c(0x47)/131
-	
 	print ("gyroz: %.3f " % gyro_zout)
 	
+	#actual angle as a sum of previous angle plus 0.1 times current angular speed
+	#0.1 is a time period beetwen each loop
 	angle = angle + 0.1*(gyro_zout-1)
-	
 	print ("angl: %3f" % angle)
 	
+	#temporary variable
 	i=i+1
+	
+	#time period
 	time.sleep(0.1)
+	
+	#road update
 	road = road + 0.118
+	
+	#index depending on road update and current movement direction
 	index= index_1 + direction*int(road)
 	print("%f\n" % index)
