@@ -10,6 +10,7 @@ import sys
 # define gyro's registers
 power_mgmt_1 = 0x6b
 power_mgmt_2 = 0x6c
+address = 0x68
 
 # set GPIO Pins
 
@@ -68,10 +69,7 @@ GPIO.setup(Echo2, GPIO.IN)
 GPIO.setup(Trig3, GPIO.OUT)
 GPIO.setup(Echo3, GPIO.IN)  
  
-  
-angle = 0
-bus = smbus.SMBus(1) # bus = smbus.SMBus(0) fuer Revision 1
-address = 0x68       # via i2cdetect
+bus = smbus.SMBus(1)
  
 #set on gyro's control register 
 bus.write_byte_data(address, power_mgmt_1, 0)
@@ -86,6 +84,7 @@ map = []
 for num in range(0,255):
 	map.append(0)
 road = 0
+angle = 0
 
 #main loop
 while True: 
