@@ -160,6 +160,16 @@ while True:
 	angle = angle + 0.1*(gyro_zout-1)
 	print ("angl: %3f" % angle)
 	
+	#change movement direction depending on angle
+	if (angle - angle%360)%360 ==0:
+		direction = 16
+	elif (angle-angle%90)%90 == 0:
+		direction = 1
+	elif (angle-angle%180)%180 == 0:
+		direction = -16
+	else:
+		direction = -1
+		
 	#temporary variable
 	i=i+1
 	
