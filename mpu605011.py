@@ -1,4 +1,4 @@
-#!/usr/bin/python
+# //smigielko//
 
 import smbus
 import math
@@ -7,10 +7,28 @@ import time
 import signal
 import sys 
 
-# Register
+# define gyro's registers
 power_mgmt_1 = 0x6b
 power_mgmt_2 = 0x6c
- 
+
+# set GPIO Pins
+
+pinTrigger = 18
+pinEcho = 24
+Trig2 = 23
+Echo2 = 25
+Trig3 = 8
+Echo3 =7
+
+west = 0
+east = 0
+north = 0
+control = 16
+
+#set Board pin mode
+GPIO.setmode(GPIO.BCM)
+
+#i2c reading functions
 def read_byte(reg):
     return bus.read_byte_data(address, reg)
  
@@ -25,38 +43,11 @@ def read_word_2c(reg):
     if (val >= 0x8000):
         return -((65535 - val) + 1)
     else:
-        return val
- 
-def dist(a,b):
-    return math.sqrt((a*a)+(b*b))
- 
-def get_y_rotation(x,y,z):
-    radians = math.atan2(x, dist(y,z))
-    return -math.degrees(radians)
- 
-def get_x_rotation(x,y,z):
-    radians = math.atan2(y, dist(x,z))
-    return math.degrees(radians)
+        return val 
 
-# use Raspberry Pi board pin numbers
-GPIO.setmode(GPIO.BCM)
-
-# set GPIO Pins
-pinTrigger = 18
-pinEcho = 24
-Trig2 = 23
-Echo2 = 25
-Trig3 = 8
-Echo3 =7
-
-west = 0
-east = 0
-north = 0
-control = 16
-
+#program closing function
 def close(signal, frame):
-	print("\nTurning off ultrasonic distance detection...\n")
-	# f.close()
+	print("\nTurning off and saving a map...\n")
 	with open("map.txt", "w") as f:
 	 	for num in range (0, len(map)):
 	 		f.write("map of %d\t" % num)
@@ -65,9 +56,9 @@ def close(signal, frame):
 	GPIO.cleanup() 
 	sys.exit(0)
 
+#pins setup	
 signal.signal(signal.SIGINT, close)
 
-# set GPIO input and output channels
 GPIO.setup(pinTrigger, GPIO.OUT)
 GPIO.setup(pinEcho, GPIO.IN)  
 
@@ -82,23 +73,24 @@ angle = 0
 bus = smbus.SMBus(1) # bus = smbus.SMBus(0) fuer Revision 1
 address = 0x68       # via i2cdetect
  
-# Aktivieren, um das Modul ansprechen zu koennen
+#set on gyro's control register 
 bus.write_byte_data(address, power_mgmt_1, 0)
 
+#declaring global variables
 i=0
 direction = 16
 index_1 = 135
 index = index_1
-position = 0
+walls = 0
 map = []
 for num in range(0,255):
 	map.append(0)
 road = 0
 
-# f = open('map.txt','w')
-
+#main loop
 while True: 
-	# set Trigger to HIGH
+	
+	#every three cycles one of three sonars makes measurment
 	if i == 0:
 		GPIO.output(pinTrigger, True)
 		time.sleep(0.00001)
@@ -140,30 +132,26 @@ while True:
 		TimeElapsed3 = stopTime3 - startTime3
 		distance3 = (TimeElapsed3 * 34300) / 2
 		print ("Distance3: %.1f cm" % distance3)
+		
+		#chcek if there are walls
 		if distance <100:
-			west = 1
+			west = 1 # binary 0000 0001
 		else:
 			west = 0
 		if distance2 <100:
-			north = 8
+			north = 8 # binary 0000 0100
 		else:
 			north = 0
 		if distance3<100:
-			east = 4
+			east = 4 # binary 0000 0010
 		else:
 			east  = 0
-		position = west + north + east + control
+		# 
+		walls = west + north + east + control
 		if map[index] == 0:
-			map[index] = position
+			map[index] = walls
 		i= -1
-		# print("at index %d" % index)
-		# print("is position %d" %position)
-		# f.write("map of %d\t" % index)
-		# f.write(str(map[index]))
-		# f.write("\n")
 	
-	gyro_xout = read_word_2c(0x43)/131
-	gyro_yout = read_word_2c(0x45)/131
 	gyro_zout = read_word_2c(0x47)/131
 	
 	print ("gyroz: %.3f " % gyro_zout)
@@ -171,14 +159,6 @@ while True:
 	angle = angle + 0.1*(gyro_zout-1)
 	
 	print ("angl: %3f" % angle)
-	
-	acc_xout = read_word_2c(0x3b)
-	acc_yout = read_word_2c(0x3d)
-	acc_zout = read_word_2c(0x3f)
-	
-	accx = - 0.02 + acc_xout / 16384.0
-	accy = 0.015 +acc_yout / 16384.0
-	accz = -0.94 + acc_zout / 16384.0
 	
 	i=i+1
 	time.sleep(0.1)
