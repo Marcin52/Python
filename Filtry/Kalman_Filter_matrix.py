@@ -39,7 +39,7 @@ class KalmanFilter():
 		'''
 
 		Metoda będąca algorytmem wykonawczym filtru kalmana. 
-		Jako argumenty przyjmuje "acc_data" - prędkość kątową z akacelrometru oraz "gyro_data" - prędkość kątową.
+		Jako argumenty przyjmuje "acc_data" - wartość kąta z akacelrometru oraz "gyro_data" - prędkość kątową.
 		Metoda zwraca wartość "x", któa jest kątem odchylenia po filtracji kalmana.
 		Wartość atrybutów "x" i "P" jest w trakcie algorytmu nadpisywana i wykorzystywana w kolejnych iteracjach.
 
